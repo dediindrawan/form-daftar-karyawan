@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *,
+        ::before,
+        ::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            line-height: 1.65;
+            font-family: 'Courier New', Courier, monospace;
+            color: #eaeaea;
+            background-color: #1e1e1e;
+        }
+
+        header section {
+            width: 100%;
+            padding: 1em;
+        }
+
+        header section:last-child {
+            margin-top: 1em;
+        }
+
+        header section h1 {
+            margin-bottom: .5em;
+            color: #88c996;
+        }
+
+        header section form {
+            width: 100%;
+        }
+
+        header section form input {
+            width: 100%;
+            padding: .5em 1em;
+            font-size: 1rem;
+            text-transform: capitalize;
+            outline: none;
+            border-radius: 5px;
+            border: 2px solid #343835;
+            color: #eaeaea;
+            background-color: transparent;
+            transition: border .3s ease-in-out;
+        }
+
+        header section form input:not(:first-child) {
+            margin-top: 1em;
+        }
+
+        header section form input[type='submit'] {
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            color: #1e1e1e;
+            background-color: #4eca69;
+        }
+
+        header section form input:focus {
+            border: 2px solid #88c996;
+        }
+
+        main {
+            width: 100%;
+            padding: 1em;
+        }
+
+        main section {
+            padding: 1em;
+            border-radius: 5px;
+            border: 2px solid #88c996;
+        }
+
+        main section h1 {
+            margin-bottom: .5em;
+            color: #88c996;
+        }
+
+        .container:not(:first-child) {
+            margin-top: 1em;
+        }
+
+        .wrapper {
+            padding: 1em;
+            border-radius: 5px;
+            border: 2px solid #88c996;
+            color: #88c996;
+            background-color: #343835;
+        }
+
+        .button {
+            width: 100%;
+            margin-top: .5em;
+            padding: .5em 1em;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 2px solid #88c996;
+            color: #88c996;
+            background-color: #1e1e1e;
+            transition: background-color .3s ease-in-out;
+        }
+
+        .button:hover {
+            color: #1e1e1e;
+            background-color: #88c996;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <section>
+            <h1>Masukkan Data Karyawan</h1>
+            <form id="form-employee">
+                <input type="text" name="employee" id="name-input" placeholder="Nama karyawan" required
+                    autocomplete="off">
+                <input type="text" name="division" id="division-input" placeholder="Divisi" required autocomplete="off">
+                <input type="submit" value="Tambahkan ke daftar karyawan">
+            </form>
+        </section>
+
+        <section>
+            <h1>Cari Data Karyawan</h1>
+            <form id="form-search">
+                <input type="search" name="search" id="search-input" placeholder="Cari nama karyawan" required
+                    autocomplete="off">
+                <input type="submit" value="Cari">
+            </form>
+        </section>
+    </header>
+
+    <main>
+        <section>
+            <h1>Daftar karyawan</h1>
+            <div id="employee-list"></div>
+        </section>
+    </main>
+
+    <script>
+        // [
+        //     {
+        //         id: String,
+        //         name: string,
+        //         employee: string
+        //     }
+        // ]
+
+        const employees = [];
+        const RENDER_EVENT = 'render-employee';
+        const SAVED_EVENT = 'saved-employee';
+        const STORAGE_KEY = 'EMPLOYEE_LIST';
+
+        // check storage support in browser
+        function isStorageExist() {
+            if (typeof (Storage) === undefined) {
+                alert('Browser tidak mendukung Local Storage');
+                return false;
+            };
+            return true;
+        };
+
+        // create unique id
+        function generateId() {
+            return +new Date();
+        };
+
+        function generateObject(id, name, division) {
+            return {
+                id,
+                name,
+                division
+            };
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // form employee
+            const formEmployee = document.getElementById('form-employee');
+            formEmployee.addEventListener('submit', () => {
+                addEmployee();
+            });
+
+            // form search employee data
+            const formSearch = document.getElementById('form-search');
+            formSearch.addEventListener('submit', (e) => {
+                e.preventDefault();
+                searchEmployee();
+            });
+
+            // storage check
+            if (isStorageExist()) {
+                loadDataFromStorage();
+            };
+        });
+
+        // add data input and save to employees variable
+        function addEmployee() {
+            const nameInput = document.getElementById('name-input').value.trim();
+            const divisionInput = document.getElementById('division-input').value.trim();
+
+            const generateID = generateId();
+            const employeeObject = generateObject(generateID, nameInput.toLowerCase(), divisionInput.toLowerCase());
+            employees.push(employeeObject);
+
+            // create function to save data on local storage
+            saveData();
+
+            document.dispatchEvent(new Event(RENDER_EVENT));
+        };
+
+        // save data is activated
+        function saveData() {
+            if (isStorageExist()) {
+                const parsed = JSON.stringify(employees);
+                localStorage.setItem(STORAGE_KEY, parsed);
+
+                document.dispatchEvent(new Event(SAVED_EVENT));
+            };
+        };
+
+        // load all data employees on local storage
+        function loadDataFromStorage() {
+            const serializedData = localStorage.getItem(STORAGE_KEY);
+            let data = JSON.parse(serializedData);
+
+            if (data !== null) {
+                for (const index of data) {
+                    employees.push(index);
+                };
+            };
+
+            document.dispatchEvent(new Event(RENDER_EVENT));
+        };
+
+        // create new element to display all data input
+        function displayEmployeeList(employeeObject) {
+            const employeeId = document.createElement('h3');
+            employeeId.innerText = 'Id: ' + employeeObject.id;
+
+            const employeeName = document.createElement('h3');
+            employeeName.innerText = 'Nama: ' + employeeObject.name;
+
+            const employeeDivision = document.createElement('h3');
+            employeeDivision.innerText = 'Divisi: ' + employeeObject.division;
+
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('button')
+            removeButton.innerText = 'Hapus';
+
+            // create new event on remove button
+            removeButton.addEventListener('click', () => {
+                removeDataFromStorage(employeeObject.id);
+            });
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('wrapper');
+            wrapper.append(employeeId, employeeName, employeeDivision, removeButton);
+
+            const container = document.createElement('div');
+            container.classList.add('container');
+            container.append(wrapper);
+            container.setAttribute('id', `employee-id-${employeeObject.id}`);
+
+            return container;
+        };
+
+        // remove button is activated
+        function removeDataFromStorage(employeeId) {
+            const employeeTarget = findDataIndex(employeeId);
+
+            if (employeeTarget === -1) return;
+            employees.splice(employeeTarget, 1);
+            location.reload();
+
+            document.dispatchEvent(new Event(RENDER_EVENT));
+
+            // create function to save data on local storage
+            saveData();
+        };
+
+        // finding data target to remove from employees list
+        function findDataIndex(employeeId) {
+            for (const index in employees) {
+                if (employees[index].id === employeeId) {
+                    return index;
+                };
+            };
+
+            return -1;
+        };
+
+        // search emplyee is activated
+        function searchEmployee() {
+            const searchInput = document.getElementById('search-input').value.trim();
+            const dataIndex = localStorage.getItem(STORAGE_KEY);
+            let data = JSON.parse(dataIndex);
+            let results = false;
+
+            const employeeList = document.getElementById('employee-list');
+            employeeList.innerHTML = '';
+            employeeList.style.textTransform = 'capitalize';
+
+            for (const employee of data) {
+                if (isSearchMatch(employee, searchInput)) {
+                    const listElement = displayEmployeeList(employee);
+                    employeeList.appendChild(listElement);
+
+                    results = true;
+                };
+            };
+
+            // notification if result from search input not found
+            if (!results) {
+                alert('Nama: ' + searchInput + ', tidak ada dalam data karyawan.');
+            };
+
+            document.dispatchEvent(new Event(RENDER_EVENT));
+        };
+
+        // add function to help search input finding of the relevan data
+        function isSearchMatch(employee, searchInput) {
+            const employeeName = employee.name;
+            return employeeName.includes(searchInput.toLowerCase());
+        };
+
+        // rendering all data and applicationing on employees list element
+        document.addEventListener(RENDER_EVENT, () => {
+            const employeeList = document.getElementById('employee-list');
+
+            employeeList.innerHTML = '';
+            employeeList.style.textTransform = 'capitalize';
+
+            if (employees.length === 0) {
+                employeeList.innerHTML = `<p>Belum ada data apapun yang disimpan.</p>`
+            } else {
+                for (const employee of employees) {
+                    const listElement = displayEmployeeList(employee);
+                    employeeList.append(listElement);
+                };
+            };
+        });
+    </script>
+</body>
+
+</html>
