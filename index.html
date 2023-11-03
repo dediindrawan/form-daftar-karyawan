@@ -57,7 +57,8 @@
             margin-top: 1em;
         }
 
-        header section form input[type='submit'] {
+        header section form input[type='submit'],
+        header section button {
             font-weight: bold;
             border: none;
             cursor: pointer;
@@ -67,6 +68,20 @@
 
         header section form input:focus {
             border: 2px solid #88c996;
+        }
+
+        header section button {
+            width: 100%;
+            margin-top: 1em;
+            padding: .5em 1em;
+            font-size: 1rem;
+            text-transform: capitalize;
+            outline: none;
+            border-radius: 5px;
+            border: 2px solid #343835;
+            color: #4eca69;
+            background-color: #343835;
+            transition: border .3s ease-in-out;
         }
 
         main {
@@ -137,6 +152,7 @@
                     autocomplete="off">
                 <input type="submit" value="Cari">
             </form>
+            <button onclick="refreshPage()">Muat Ulang Halaman</button>
         </section>
     </header>
 
@@ -202,6 +218,10 @@
                 loadDataFromStorage();
             };
         });
+
+        function refreshPage() {
+            location.reload();
+        };
 
         // add data input and save to employees variable
         function addEmployee() {
@@ -323,8 +343,6 @@
             if (!results) {
                 alert('Nama: ' + searchInput + ', tidak ada dalam data karyawan.');
             };
-
-            document.dispatchEvent(new Event(RENDER_EVENT));
         };
 
         // add function to help search input finding of the relevan data
