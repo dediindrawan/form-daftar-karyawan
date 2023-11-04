@@ -22,6 +22,22 @@
             background-color: #1e1e1e;
         }
 
+        .toast {
+            width: 100%;
+            padding: 1em;
+            font-weight: bold;
+            position: fixed;
+            top: 0;
+            transform: translateY(-100%);
+            color: #1e1e1e;
+            background-color: #cabe4e;
+            transition: all .3s ease-in-out;
+        }
+
+        header {
+            width: 100%;
+        }
+
         header section {
             width: 100%;
             padding: 1em;
@@ -68,6 +84,10 @@
 
         header section form input:focus {
             border: 2px solid #88c996;
+        }
+
+        header section form input[type='submit']:focus {
+            border: none;
         }
 
         header section button {
@@ -135,6 +155,7 @@
 
 <body>
     <header>
+        <div class="toast">Nama yang Anda cari tidak ada.</div>
         <section>
             <h1>Masukkan Data Karyawan</h1>
             <form id="form-employee">
@@ -341,7 +362,12 @@
 
             // notification if result from search input not found
             if (!results) {
-                alert('Nama: ' + searchInput + ', tidak ada dalam data karyawan.');
+                const toast = document.querySelector('.toast');
+                toast.style.transform = 'translateY(0)';
+
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(-100%)';
+                }, 3000);
             };
         };
 
